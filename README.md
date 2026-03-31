@@ -73,7 +73,7 @@ You will notice the prompt changes to `sqlite>`. This means you are now talking 
 
 ---
 
-## 🏗️ Step 2: Creating the Tables
+##  Step 2: Creating the Tables
 
 The file `create_tables.sql` contains all the `CREATE TABLE` commands. Take a moment to read that file to see how tables, columns, data types (TEXT, INTEGER, DATE), and Primary/Foreign Keys are defined.
 
