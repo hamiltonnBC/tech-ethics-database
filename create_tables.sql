@@ -1,61 +1,66 @@
--- Schema: Campus Resource Hub
--- Database: SQLite
--- 
-
--- 1. Departments Table
--- This table stores information about the different departments
--- across the campus that maintain resources.
-CREATE TABLE IF NOT EXISTS Departments (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+-- 1. Providers Table (Centers, Departments, Clubs)
+CREATE TABLE providers (
+    provider_id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
-    location TEXT NOT NULL,
-    contact_email TEXT
+    provider_type TEXT, -- e.g., 'Department', 'Center', 'Club'
+    location TEXT,
+    website TEXT,
+    contact_email TEXT,
+    contact_name TEXT   
 );
 
--- 2. Resources Table
--- This table lists every specific item or offering available to students.
--- It links to the Departments table using a Foreign Key to show ownership.
-CREATE TABLE IF NOT EXISTS Resources (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    description TEXT,
-    type TEXT NOT NULL,     -- e.g., 'Hardware', 'Software', 'Room', 'Book'
-    department_id INTEGER,
-    FOREIGN KEY(department_id) REFERENCES Departments(id)
-);
-
--- 3. Students Table
--- A list of all active students who are eligible to borrow items.
-CREATE TABLE IF NOT EXISTS Students (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    first_name TEXT NOT NULL,
-    last_name TEXT NOT NULL,
+-- 2. Students Table
+CREATE TABLE students (
+    student_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    full_name TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
-    enrollment_year INTEGER NOT NULL
+    dorm_name TEXT, -- e.g., 'Ecovillage', 'Danforth'
+    class_year TEXT, -- e.g., 'first year, etc. 
+    is_non_traditional INTEGER DEFAULT 0, -- 0 for No, 1 for Yes
+    is_international INTEGER DEFAULT 0
 );
 
--- 4. ResourceLog Table
--- This table tracks transactions whenever a student borrows a resource.
--- It has two foreign keys to link Students and Resources.
-CREATE TABLE IF NOT EXISTS ResourceLog (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    student_id INTEGER,
-    resource_id INTEGER,
-    borrowed_date DATE NOT NULL,
-    returned_date DATE,
-    status TEXT NOT NULL,   -- e.g., 'Active', 'Returned', 'Overdue'
-    FOREIGN KEY(student_id) REFERENCES Students(id),
-    FOREIGN KEY(resource_id) REFERENCES Resources(id)
+-- 3. Academic Programs (Majors and Minors)
+CREATE TABLE programs (
+    program_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    program_name TEXT NOT NULL UNIQUE
 );
 
--- 5. Reviews Table
--- Allows students to rate their experience with specific resources.
-CREATE TABLE IF NOT EXISTS Reviews (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+-- 4. Student-Program Bridge (The Many-to-Many Link)
+CREATE TABLE student_programs (
     student_id INTEGER,
-    resource_id INTEGER,
-    rating INTEGER CHECK (rating >= 1 AND rating <= 5), -- Rating must be 1 to 5
-    comment TEXT,
-    FOREIGN KEY(student_id) REFERENCES Students(id),
-    FOREIGN KEY(resource_id) REFERENCES Resources(id)
+    program_id INTEGER,
+    type TEXT NOT NULL, -- 'Major' or 'Minor'
+    PRIMARY KEY (student_id, program_id),
+    FOREIGN KEY (student_id) REFERENCES students(student_id),
+    FOREIGN KEY (program_id) REFERENCES programs(program_id)
+);
+
+-- 5. Resources Table
+CREATE TABLE resources (
+    resource_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    provider_id INTEGER NOT NULL,
+    title TEXT NOT NULL,
+    category TEXT, -- e.g., 'Financial', 'Academic', 'Career'
+    description TEXT,
+    expiration_date TEXT, -- Stored as 'YYYY-MM-DD'
+    
+    -- Eligibility Requirements (Data-driven logic)
+    req_non_trad_only INTEGER DEFAULT 0, 
+    req_dorm_specific TEXT, -- e.g., 'Ecovillage' or NULL if open to all
+    req_min_class_year TEXT, -- e.g., 'Junior'
+    
+    FOREIGN KEY (provider_id) REFERENCES providers(provider_id)
+);
+
+-- 6. Resource Interaction Log
+CREATE TABLE resource_interactions (
+    interaction_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    student_id INTEGER NOT NULL,
+    resource_id INTEGER NOT NULL,
+    interaction_date TEXT DEFAULT (CURRENT_DATE), -- Auto-fills with 'YYYY-MM-DD'
+    notes TEXT, -- Optional: "Student requested follow-up" or "Resume reviewed"
+    
+    FOREIGN KEY (student_id) REFERENCES students(student_id),
+    FOREIGN KEY (resource_id) REFERENCES resources(resource_id)
 );

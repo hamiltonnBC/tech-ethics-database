@@ -3,54 +3,64 @@
 Welcome to the SQL Database Workshop! In this repository, you will learn the basics of relational databases by building a SQLite database for a **Campus Resource Hub**.
 
 ## Scenario
-You have been tasked with building the backend database schema to manage campus resources (hardware, rooms, software licenses) that students can check out from different campus departments.
+You have been tasked with building the backend database schema to manage campus resources (like grants, advising, or special programs) provided by different groups (departments, centers, clubs). Resources may have eligibility requirements such as dorm residency, class year, or non-traditional student status. Students are linked to their academic programs (majors/minors) to further determine eligibility.
 
 ##  Database Schema
 
-The database will contain 5 tables. Here is how they relate to each other:
+The database will contain 6 tables. Here is how they relate to each other:
 
 ```mermaid
 erDiagram
-    Departments ||--o{ Resources : "owns"
-    Students ||--o{ ResourceLog : "checks out"
-    Resources ||--o{ ResourceLog : "is checked out in"
-    Students ||--o{ Reviews : "writes"
-    Resources ||--o{ Reviews : "receives"
+    providers ||--o{ resources : "provides"
+    students ||--o{ student_programs : "has"
+    programs ||--o{ student_programs : "belongs to"
+    students ||--o{ resource_interactions : "logs"
+    resources ||--o{ resource_interactions : "logged in"
 
-    Departments {
-        int id PK
+    providers {
+        int provider_id PK
         string name
+        string provider_type
         string location
+        string website
         string contact_email
+        string contact_name
     }
-    Resources {
-        int id PK
-        string name
-        string description
-        string type
-        int department_id FK
-    }
-    Students {
-        int id PK
-        string first_name
-        string last_name
+    students {
+        int student_id PK
+        string full_name
         string email
-        int enrollment_year
+        string dorm_name
+        string class_year
+        int is_non_traditional
+        int is_international
     }
-    ResourceLog {
-        int id PK
+    programs {
+        int program_id PK
+        string program_name
+    }
+    student_programs {
+        int student_id PK,FK
+        int program_id PK,FK
+        string type
+    }
+    resources {
+        int resource_id PK
+        int provider_id FK
+        string title
+        string category
+        string description
+        string expiration_date
+        int req_non_trad_only
+        string req_dorm_specific
+        string req_min_class_year
+    }
+    resource_interactions {
+        int interaction_id PK
         int student_id FK
         int resource_id FK
-        date borrowed_date
-        date returned_date
-        string status
-    }
-    Reviews {
-        int id PK
-        int student_id FK
-        int resource_id FK
-        int rating
-        string comment
+        string interaction_date
+        string notes
     }
 ```
 
@@ -63,9 +73,9 @@ You will be using `sqlite3` at the command line.
 **Mac/Linux:** Usually pre-installed. Open your terminal.
 **Windows:** If you don't have SQLite, you can download the command-line tools from the [SQLite Website](https://www.sqlite.org/download.html). Or, you can use online interactive tools like [DB Fiddle](https://www.db-fiddle.com/).
 
-To open a new SQLite database called `campus_hub.db`, type this in your terminal inside this repository folder:
+To open a new SQLite database called `campus_resources.db`, type this in your terminal inside this repository folder:
 ```bash
-sqlite3 campus_hub.db
+sqlite3 campus_resources.db
 ```
 You will notice the prompt changes to `sqlite>`. This means you are now talking directly to the SQLite database engine!
 - Type `.help` for a list of SQLite commands.
@@ -88,32 +98,40 @@ Check that the tables actually exist by typing:
 ```
 To see the structure of a specific table, use:
 ```sql
-.schema Students
+.schema students
 ```
 
 ---
 
 ##  Step 3: Seeding the Data
 
-An empty database isn't much fun to query. Let's add some "dummy" data to practice with. We've written `INSERT` statements in `seed_data.sql`.
+An empty database isn't much fun to query! Head over to the `seeding_guide/` directory and check out the `README.md` there. It will explain how to safely insert dummy data into your tables and how to properly respect Database Foreign Key requirements.
 
-Execute them in the `sqlite>` prompt:
+Once you have read the guide and reviewed the mock data, run this in your `sqlite>` prompt to automatically insert all records in order:
 ```sql
-.read seed_data.sql
+.read seeding_guide/seed_all.sql
 ```
 
 You can verify the data is there by running a `SELECT` statement directly in the prompt:
 ```sql
-SELECT * FROM Students;
+SELECT * FROM students;
 ```
 
 *(Tip: type `.mode box` followed by Enter before running your SELECT if you want your output to look like a nice table!)*
 
 ---
 
-##  Step 4: Your Turn - The Exercises
+##  Step 4: Launch the Interactive UI Dashboard
 
-Open `exercises.sql` in your code editor. This file contains step-by-step prompts for you to write your own `SELECT`, `ALTER`, `UPDATE`, `INSERT`, and `DELETE` queries.
+If you want to see all your data come to life, we've included an Interactive Dashboard written in Python that allows you to click through Student Profiles, Admin Data, and Resource Interactions. 
+
+Check out the [Dashboard Setup Guide (DASHBOARD_README.md)](DASHBOARD_README.md) to see how to instantly launch the UI on your laptop without the hassle of setting up complicated Python environments!
+
+---
+
+##  Step 5: Your Turn - The Exercises
+
+Open `exercises.sql` in your code editor. This file contains step-by-step prompts for you to write your own `SELECT`, `ALTER`, `UPDATE`, `INSERT`, and `DELETE` queries based on the new schema.
 
 You can copy and paste your answers from the file directly into the `sqlite>` prompt to test them!
 
