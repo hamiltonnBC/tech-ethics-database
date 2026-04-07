@@ -121,18 +121,18 @@ SELECT * FROM students;
 
 ---
 
-##  Step 4: Your Turn - The Exercises
+##  Step 4: Launch the Interactive UI Dashboard
+
+If you want to see all your data come to life, we've included an Interactive Dashboard written in Python that allows you to click through Student Profiles, Admin Data, and Resource Interactions. 
+
+Check out the [Dashboard Setup Guide (DASHBOARD_README.md)](DASHBOARD_README.md) to see how to instantly launch the UI on your laptop without the hassle of setting up complicated Python environments!
+
+---
+
+##  Step 5: Your Turn - The Exercises
 
 Open `exercises.sql` in your code editor. This file contains step-by-step prompts for you to write your own `SELECT`, `ALTER`, `UPDATE`, `INSERT`, and `DELETE` queries based on the new schema.
 
 You can copy and paste your answers from the file directly into the `sqlite>` prompt to test them!
 
 Good luck, and have fun building the hub!
-
----
-
-##  Step 5: Launch the Interactive UI Dashboard
-
-If you want to see all your data come to life, we've included an Interactive Dashboard written in Python that allows you to click through Student Profiles, Admin Data, and Resource Interactions. 
-
-Check out the [Dashboard Setup Guide (DASHBOARD_README.md)](DASHBOARD_README.md) to see how to instantly launch the UI on your laptop without the hassle of setting up complicated Python environments!

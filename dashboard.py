@@ -215,6 +215,388 @@ VALUES (?, ?, ?, ?, ?, ?, ?);""", language="sql")
                         st.error("Title is required.")
         else:
             st.warning("Please add at least one Provider to the database before creating a Resource.")
+def schema_explained_view():
+    st.header("Schema Explained")
+    st.write("A comprehensive guide to the database structure, relationships, and design choices. Perfect for teaching and understanding the architecture.")
+    
+    st.markdown("---")
+    st.subheader("High-Level Relationship Diagram")
+    st.graphviz_chart('''
+    digraph Schema {
+        rankdir=LR;
+        node [shape=none, fontname="Helvetica"];
+        edge [color="#555555", fontsize=10];
+
+        providers [label=<
+          <table border="0" cellborder="1" cellspacing="0" cellpadding="4">
+            <tr><td bgcolor="#4A90E2"><font color="white"><b>Providers</b></font></td></tr>
+            <tr><td port="id" align="left"><u>provider_id (PK)</u></td></tr>
+            <tr><td align="left">name</td></tr>
+            <tr><td align="left">provider_type</td></tr>
+            <tr><td align="left">location</td></tr>
+            <tr><td align="left">website</td></tr>
+            <tr><td align="left">contact_email</td></tr>
+            <tr><td align="left">contact_name</td></tr>
+          </table>
+        >];
+        
+        resources [label=<
+          <table border="0" cellborder="1" cellspacing="0" cellpadding="4">
+            <tr><td bgcolor="#3498DB"><font color="white"><b>Resources</b></font></td></tr>
+            <tr><td port="id" align="left"><u>resource_id (PK)</u></td></tr>
+            <tr><td port="fk_prov" align="left">provider_id (FK)</td></tr>
+            <tr><td align="left">title</td></tr>
+            <tr><td align="left">category</td></tr>
+            <tr><td align="left">description</td></tr>
+            <tr><td align="left">expiration_date</td></tr>
+            <tr><td align="left">req_non_trad_only</td></tr>
+            <tr><td align="left">req_dorm_specific</td></tr>
+            <tr><td align="left">req_min_class_year</td></tr>
+          </table>
+        >];
+
+        interactions [label=<
+          <table border="0" cellborder="1" cellspacing="0" cellpadding="4">
+            <tr><td bgcolor="#F5A623"><font color="black"><b>Resource_Interactions</b></font></td></tr>
+            <tr><td port="id" align="left"><u>interaction_id (PK)</u></td></tr>
+            <tr><td port="fk_res" align="left">resource_id (FK)</td></tr>
+            <tr><td port="fk_stu" align="left">student_id (FK)</td></tr>
+            <tr><td align="left">interaction_date</td></tr>
+            <tr><td align="left">notes</td></tr>
+          </table>
+        >];
+
+        students [label=<
+          <table border="0" cellborder="1" cellspacing="0" cellpadding="4">
+            <tr><td bgcolor="#BB6BD9"><font color="white"><b>Students</b></font></td></tr>
+            <tr><td port="id" align="left"><u>student_id (PK)</u></td></tr>
+            <tr><td align="left">full_name</td></tr>
+            <tr><td align="left">email</td></tr>
+            <tr><td align="left">dorm_name</td></tr>
+            <tr><td align="left">class_year</td></tr>
+            <tr><td align="left">is_non_traditional</td></tr>
+            <tr><td align="left">is_international</td></tr>
+          </table>
+        >];
+
+        programs [label=<
+          <table border="0" cellborder="1" cellspacing="0" cellpadding="4">
+            <tr><td bgcolor="#FF7A59"><font color="white"><b>Programs</b></font></td></tr>
+            <tr><td port="id" align="left"><u>program_id (PK)</u></td></tr>
+            <tr><td align="left">program_name</td></tr>
+          </table>
+        >];
+
+        bridge [label=<
+          <table border="0" cellborder="1" cellspacing="0" cellpadding="4">
+            <tr><td bgcolor="#D3D3D3"><font color="black"><b>Student_Programs</b></font></td></tr>
+            <tr><td port="fk_stu" align="left">student_id (PK, FK)</td></tr>
+            <tr><td port="fk_prog" align="left">program_id (PK, FK)</td></tr>
+            <tr><td align="left">type</td></tr>
+          </table>
+        >];
+
+        providers:id -> resources:fk_prov [label=" 1:M "];
+        resources:id -> interactions:fk_res [label=" 1:M "];
+        students:id -> interactions:fk_stu [label=" 1:M "];
+        students:id -> bridge:fk_stu [label=" 1:M "];
+        programs:id -> bridge:fk_prog [label=" 1:M "];
+    }
+    ''')
+
+    st.markdown("#### Database Business Rules:")
+    st.markdown("""
+- **Students & Programs**: A Student can have many programs, and a Program can belong to many students. Therefore, they have a **many-to-many** relationship, and we place a bridge table (`student_programs`) between them.
+- **Providers & Resources**: A Provider can provide many resources, but a Resource can only be provided by *one* provider. Therefore, the `provider_id` is in the `resources` table (linking it back to the provider), but the `resource_id` is *not* in the `providers` table.
+- **Students & Resources**: A Student can log multiple interactions, and a Resource can be interacted with multiple times by different students. Therefore, `resource_interactions` connects them in a **many-to-many** relationship.
+    """)
+
+    st.markdown("---")
+    st.subheader("1. Entity Justifications & Table Walkthrough")
+    
+    c1, c2 = st.columns([1, 1])
+    with c1:
+        st.markdown("### Providers Table")
+        st.markdown("**Design Choice**: One table for Departments, Centers, and Clubs.")
+        st.markdown("**Justification**: Since a Department and a Club both have a name, a location, and offer resources, they share the same 'shape.' Using one table allows you to perform a single query to see every service provider on campus. The `provider_type` column preserves the distinction without the complexity of multiple identical tables.")
+    with c2:
+        st.code('''CREATE TABLE providers (
+    provider_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    provider_type TEXT, -- e.g., 'Department', 'Center', 'Club'
+    location TEXT,
+    website TEXT,
+    contact_email TEXT,
+    contact_name TEXT   
+);''', language='sql')
+
+    st.divider()
+    c1, c2 = st.columns([1, 1])
+    with c1:
+        st.markdown("### Students Table")
+        st.markdown("**Design Choice**: Use of Integers for Booleans.")
+        st.markdown("**Justification**: SQLite does not have a native BOOLEAN type; it uses 0 and 1. This is a great teaching moment for storage efficiency.")
+    with c2:
+        st.code('''CREATE TABLE students (
+    student_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    full_name TEXT NOT NULL,
+    email TEXT UNIQUE NOT NULL,
+    dorm_name TEXT, -- e.g., 'Ecovillage', 'Danforth'
+    class_year TEXT, -- 'Freshman', 'Sophomore', etc.
+    is_non_traditional INTEGER DEFAULT 0, -- 0 for No, 1 for Yes
+    is_international INTEGER DEFAULT 0
+);''', language='sql')
+
+    st.divider()
+    c1, c2 = st.columns([1, 1])
+    with c1:
+        st.markdown("### Programs & Student_Programs (The Bridge)")
+        st.markdown("**Design Choice**: A separate table for the list of programs and a 'link' table.")
+        st.markdown("**Justification**: This illustrates a **Many-to-Many (M:M)** relationship.")
+        st.markdown("- One student can have multiple majors/minors.")
+        st.markdown("- One major (e.g., Computer Science) has many students.")
+        st.markdown("By using a bridge table, we avoid messy comma-separated lists in the students table, making it easy to count exactly how many 'Senior Physics Majors' exist with one simple JOIN.")
+    with c2:
+        st.code('''CREATE TABLE programs (
+    program_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    program_name TEXT NOT NULL UNIQUE
+);
+
+CREATE TABLE student_programs (
+    student_id INTEGER,
+    program_id INTEGER,
+    type TEXT NOT NULL, -- 'Major' or 'Minor'
+    PRIMARY KEY (student_id, program_id),
+    FOREIGN KEY (student_id) REFERENCES students(student_id),
+    FOREIGN KEY (program_id) REFERENCES programs(program_id)
+);''', language='sql')
+
+    st.divider()
+    c1, c2 = st.columns([1, 1])
+    with c1:
+        st.markdown("### Resources Table")
+        st.markdown("**Design Choice**: Including `req_` columns (Eligibility Attributes).")
+        st.markdown("**Justification**: This moves the 'business logic' into the data. Instead of writing a new SQL query every time a resource changes its rules, the user just updates a row in the table.")
+        st.markdown("**Foreign Key**: The `provider_id` creates a **One-to-Many (1:M)** relationship. One department provides many resources, but each resource belongs to one department.")
+    with c2:
+        st.code('''CREATE TABLE resources (
+    resource_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    provider_id INTEGER NOT NULL,
+    title TEXT NOT NULL,
+    category TEXT, -- e.g., 'Financial', 'Academic', 'Career'
+    description TEXT,
+    expiration_date TEXT, -- Stored as 'YYYY-MM-DD'
+    
+    -- Eligibility Requirements (Data-driven logic)
+    req_non_trad_only INTEGER DEFAULT 0, 
+    req_dorm_specific TEXT, -- e.g., 'Ecovillage' or NULL if open to all
+    req_min_class_year TEXT, -- e.g., 'Junior'
+    
+    FOREIGN KEY (provider_id) REFERENCES providers(provider_id)
+);''', language='sql')
+
+    st.divider()
+    c1, c2 = st.columns([1, 1])
+    with c1:
+        st.markdown("### Resource Interactions Log")
+        st.markdown("Logs exactly when a student accesses or requests a resource.")
+        st.markdown("Connects **Students** and **Resources** through a many-to-many relationship.")
+    with c2:
+        st.code('''CREATE TABLE resource_interactions (
+    interaction_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    student_id INTEGER NOT NULL,
+    resource_id INTEGER NOT NULL,
+    interaction_date TEXT DEFAULT (CURRENT_DATE), -- Auto-fills with 'YYYY-MM-DD'
+    notes TEXT,
+    
+    FOREIGN KEY (student_id) REFERENCES students(student_id),
+    FOREIGN KEY (resource_id) REFERENCES resources(resource_id)
+);''', language='sql')
+
+    st.markdown("---")
+    st.subheader("2. Data Type Notes for your Workshop")
+    st.markdown("""
+- **`INTEGER PRIMARY KEY AUTOINCREMENT`**: This ensures every row has a unique "ID card" number that the database manages automatically.
+- **`TEXT` for Dates**: Remind students that SQLite sorts dates correctly only if they are in `YYYY-MM-DD` format.
+- **`NULL` vs. `NOT NULL`**: In the `student_programs` table, we don't need a "Minor" column in the student table that stays empty (`NULL`) for most people. If they don't have a minor, there is simply no row in the bridge table. This is **Normalization** at work - only storing data that actually exists.
+
+By adding columns like `req_non_trad_only` (Boolean) to the resources table, the data tells the story.
+
+**The Power of this approach**: You can write one "Smart Query" that works for any student!
+    """)
+    
+    st.markdown("---")
+    st.subheader("3. Why not just a 'List' of Majors?")
+    st.markdown('In database terms, putting a list of values (like "Biology, Chemistry") into a single cell is called a **Multi-valued Attribute**.')
+    
+    colA, colB = st.columns(2)
+    with colA:
+        st.markdown("#### The 'List' Approach (The Easy Way)")
+        st.markdown("**Pros**: It's easy to read when looking at the whole table. The schema stays 'thin' with fewer tables.")
+        st.markdown("**Cons**:")
+        st.markdown("- **Violates First Normal Form (1NF)**.")
+        st.markdown("- **Searching is hard**: If you want to find all 'Biology' majors, you can't just say `WHERE major = 'Biology'`. You have to use `LIKE '%Biology%'`, which is much slower and can lead to 'false positives' (e.g., finding 'Microbiology' when searching for 'Biology').")
+        st.markdown("- **Updates are messy**: If a student drops one of three majors, you have to write code to string-manipulate that specific cell to 'snipe' out the correct word.")
+        st.markdown("- **Data Integrity**: There's no way to prevent a typo like 'Bilogy' because it's just a text blob.")
+    
+    with colB:
+        st.markdown("#### The 'Bridge Table' (The Professional Way)")
+        st.markdown("**Justification**: This is a Many-to-Many relationship. By having a `student_programs` table, each 'connection' is its own row.")
+        st.markdown("**Workshop Takeaway**: This allows you to teach Joins. To get a student's majors, you join the student to the bridge table. This is the 'standard' way to handle any situation where 'one X can have many Ys, and one Y can have many Xs.'")
+
+
+def sql_editor_view(conn):
+    st.header("SQL Playground")
+    st.write("Write and execute your own SQL queries against the database in real time.")
+    
+    with st.expander("📖 SQL Quick Lesson: From Basics to Advanced", expanded=False):
+        st.markdown("""
+        ### 1. The Basics: SELECT
+        The `SELECT` statement is the most common command in SQL. It fetches data from a database.
+        - **Fetch everything in a table:** 
+          `SELECT * FROM students;`
+        - **Fetch specific columns:** 
+          `SELECT full_name, email FROM students;`
+
+        ### 2. Filtering Data: WHERE
+        Use `WHERE` to narrow down your results based on specific conditions.
+        - **Simple condition:** 
+          `SELECT * FROM students WHERE class_year = 'Senior';`
+        - **Multiple conditions:** 
+          `SELECT * FROM students WHERE class_year = 'Senior' AND is_non_traditional = 1;`
+
+        ### 3. Sorting Data: ORDER BY
+        Use `ORDER BY` to sort your results.
+        - **Sort alphabetically:** 
+          `SELECT * FROM students ORDER BY full_name ASC;`
+        - **Sort by recent dates:** 
+          `SELECT * FROM resource_interactions ORDER BY interaction_date DESC;`
+
+        ### 4. Counting & Math: COUNT, LIMIT
+        - **Limit results to top 5:** 
+          `SELECT * FROM resources LIMIT 5;`
+        - **Count the number of students:** 
+          `SELECT COUNT(*) FROM students;`
+
+        ### 5. Combining Tables: JOIN
+        Databases spread data across multiple tables. Use `JOIN` to bring them together using the lines that connect them.
+        - **See Provider names alongside their Resources:**
+          ```sql
+          SELECT providers.name, resources.title 
+          FROM resources 
+          JOIN providers ON resources.provider_id = providers.provider_id;
+          ```
+        *Tip: You use `ON` to tell the database which columns match up between the two tables!*
+        
+        ### 6. Aggregating: GROUP BY
+        Use `GROUP BY` to group rows that have the same values into summary rows, often paired with `COUNT`.
+        - **Count how many students live in each dorm:**
+          ```sql
+          SELECT dorm_name, COUNT(*) as student_count 
+          FROM students 
+          GROUP BY dorm_name;
+          ```
+        """)
+    
+    query = st.text_area("SQL Query", height=150, placeholder="SELECT * FROM students;")
+    
+    if st.button("Execute Query"):
+        if query.strip():
+            try:
+                # If it's a SELECT query, we want to return a dataframe
+                if query.strip().upper().startswith(("SELECT", "PRAGMA")):
+                    df = pd.read_sql_query(query, conn)
+                    st.dataframe(df, use_container_width=True, hide_index=True)
+                    st.success(f"Query returned {len(df)} rows.")
+                else:
+                    # For INSERT, UPDATE, DELETE, CREATE, ALTER
+                    cursor = conn.cursor()
+                    cursor.executescript(query) # Using executescript to allow multiple statements
+                    conn.commit()
+                    st.success("Query executed successfully!")
+            except Exception as e:
+                st.error(f"SQL Error: {e}")
+        else:
+            st.warning("Please enter a SQL query.")
+
+def analysis_insights_view(conn):
+    st.header("Data Analysis & Ethical Insights")
+    st.write("This page demonstrates the results of our Data Analysis queries. By comparing the baseline demographics of our campus against the interaction rates at specific resources, we can uncover potential systemic barriers or hidden biases.")
+
+    # 1. International Student Bias
+    st.subheader("1. Drop-In Writing Tutoring: International Student Discrepancy")
+    with st.expander("Show SQL Command"):
+        st.code("""SELECT r.title, s.is_international, COUNT(ri.interaction_id) AS interaction_count,
+    ROUND(COUNT(ri.interaction_id) * 100.0 / total.total, 2) AS percentage_of_turnout
+FROM resource_interactions ri
+JOIN students s ON ri.student_id = s.student_id
+JOIN resources r ON ri.resource_id = r.resource_id
+CROSS JOIN (SELECT COUNT(*) AS total FROM resource_interactions WHERE resource_id = 4) AS total
+WHERE ri.resource_id = 4
+GROUP BY s.is_international, r.title;""", language="sql")
+    
+    query1 = """SELECT r.title, s.is_international, COUNT(ri.interaction_id) AS interaction_count,
+    ROUND(COUNT(ri.interaction_id) * 100.0 / total.total, 2) AS percentage_of_turnout
+FROM resource_interactions ri
+JOIN students s ON ri.student_id = s.student_id
+JOIN resources r ON ri.resource_id = r.resource_id
+CROSS JOIN (SELECT COUNT(*) AS total FROM resource_interactions WHERE resource_id = 4) AS total
+WHERE ri.resource_id = 4
+GROUP BY s.is_international, r.title;"""
+    try:
+        df1 = pd.read_sql_query(query1, conn)
+        st.dataframe(df1, use_container_width=True, hide_index=True)
+        st.info("**Conclusion:** International students generally make up ~20% of the baseline student population, yet this data shows they have disproportionately low representation at Drop-In Writing Tutoring. This suggests a systemic barrier—perhaps the tutoring center is mainly advertised through domestic-focused channels, or students feel the service isn't designed for ESL (English as a Second Language) learners.")
+    except Exception as e:
+        st.error(f"Error loading query: {e}")
+
+    # 2. Non-Traditional Student Bias
+    st.subheader("2. Free Flu Vaccine Clinic: Non-Traditional Student Isolation")
+    with st.expander("Show SQL Command"):
+        st.code("""-- Query resource 30 comparing non_traditional status
+SELECT r.title, s.is_non_traditional, COUNT(ri.interaction_id) AS interaction_count,
+    ROUND(COUNT(ri.interaction_id) * 100.0 / total.total, 2) AS percentage_of_turnout
+FROM resource_interactions ri ...""", language="sql")
+    
+    query2 = """SELECT r.title, s.is_non_traditional, COUNT(ri.interaction_id) AS interaction_count,
+    ROUND(COUNT(ri.interaction_id) * 100.0 / total.total, 2) AS percentage_of_turnout
+FROM resource_interactions ri
+JOIN students s ON ri.student_id = s.student_id
+JOIN resources r ON ri.resource_id = r.resource_id
+CROSS JOIN (SELECT COUNT(*) AS total FROM resource_interactions WHERE resource_id = 30) AS total
+WHERE ri.resource_id = 30
+GROUP BY s.is_non_traditional, r.title;"""
+    try:
+        df2 = pd.read_sql_query(query2, conn)
+        st.dataframe(df2, use_container_width=True, hide_index=True)
+        st.info("**Conclusion:** Non-traditional students make up ~10% of the campus base, but representation at the Free Flu Vaccine Clinic is extremely low. Given that non-traditional students often commute, have full-time jobs, or support families, scheduling a clinic during standard daytime work hours inherently excludes them. Offering weekend or evening hours might resolve this discrepancy.")
+    except Exception as e:
+        st.error(f"Error loading query: {e}")
+
+    # 3. Dorm Isolation
+    st.subheader("3. Sunday Evening Dinner: Geographic/Dorm Isolation")
+    with st.expander("Show SQL Command"):
+        st.code("""-- Analyzing Resource 18 (Sunday Evening Dinner) representation by dorm...
+SELECT r.title, s.dorm_name, COUNT(ri.interaction_id) AS interaction_count,
+    ROUND(COUNT(ri.interaction_id) * 100.0 / total.total, 2) AS percentage_of_turnout
+FROM resource_interactions ri ...""", language="sql")
+    
+    query3 = """SELECT r.title, s.dorm_name, COUNT(ri.interaction_id) AS interaction_count,
+    ROUND(COUNT(ri.interaction_id) * 100.0 / total.total, 2) AS percentage_of_turnout
+FROM resource_interactions ri
+JOIN students s ON ri.student_id = s.student_id
+JOIN resources r ON ri.resource_id = r.resource_id
+CROSS JOIN (SELECT COUNT(*) AS total FROM resource_interactions WHERE resource_id = 18) AS total
+WHERE ri.resource_id = 18
+GROUP BY s.dorm_name, r.title
+ORDER BY interaction_count DESC;"""
+    try:
+        df3 = pd.read_sql_query(query3, conn)
+        st.dataframe(df3, use_container_width=True, hide_index=True)
+        st.info("**Conclusion:** The 'Sunday Evening Dinner' shows healthy turnout from most dorms, except for residents of the 'Draper' dorm. This highlights a likely geographic or logistical issue. Perhaps Draper is located off the main campus and lacks a late Sunday bus route, making it unsafe or impossible for residents to attend the event.")
+    except Exception as e:
+        st.error(f"Error loading query: {e}")
+
 
 def main():
     st.set_page_config(page_title="Campus Hub", layout="wide")
@@ -223,7 +605,7 @@ def main():
     conn = sqlite3.connect("campus_resources.db", check_same_thread=False)
     
     st.sidebar.title("Navigation")
-    route = st.sidebar.radio("Go to", ["Home", "Student View", "Log Interaction", "Admin Dashboard"])
+    route = st.sidebar.radio("Go to", ["Home", "Student View", "Log Interaction", "Admin Dashboard", "Schema Explained", "SQL Playground", "Analysis Insights"])
     
     if route == "Home":
         st.title("Welcome to the Campus Hub UI")
@@ -234,6 +616,7 @@ def main():
         - **Student View:** See how individual profiles alter what data is surfaced to them based on logic in the `resources` table.
         - **Log Interaction:** Let front-desk staff log into the `resource_interactions` table smoothly.
         - **Admin Dashboard:** Monitor the raw tables and insert new data directly.
+        - **Schema Explained:** Check out the data models and design choices.
         """)
         
         st.info("To manually run SQL script files or completely reset the database, use the terminal.")
@@ -244,6 +627,12 @@ def main():
         log_interaction(conn)
     elif route == "Admin Dashboard":
         admin_view(conn)
+    elif route == "Schema Explained":
+        schema_explained_view()
+    elif route == "SQL Playground":
+        sql_editor_view(conn)
+    elif route == "Analysis Insights":
+        analysis_insights_view(conn)
         
     conn.close()
 

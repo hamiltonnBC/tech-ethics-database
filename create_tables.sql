@@ -15,7 +15,7 @@ CREATE TABLE students (
     full_name TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
     dorm_name TEXT, -- e.g., 'Ecovillage', 'Danforth'
-    class_year TEXT, -- e.g., 'Freshman', 'Sophomore', 'Junior', 'Senior', 'Alum'
+    class_year TEXT, -- e.g., 'first year, etc. 
     is_non_traditional INTEGER DEFAULT 0, -- 0 for No, 1 for Yes
     is_international INTEGER DEFAULT 0
 );
