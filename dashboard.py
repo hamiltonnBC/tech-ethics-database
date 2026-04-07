@@ -335,7 +335,7 @@ def schema_explained_view():
     with c1:
         st.markdown("### Students Table")
         st.markdown("**Design Choice**: Use of Integers for Booleans.")
-        st.markdown("**Justification**: SQLite does not have a native BOOLEAN type; it uses 0 and 1. This is a great teaching moment for storage efficiency.")
+        st.markdown("**Justification**: SQLite does not have a native BOOLEAN type; it uses 0 and 1.")
     with c2:
         st.code('''CREATE TABLE students (
     student_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -598,8 +598,103 @@ ORDER BY interaction_count DESC;"""
         st.error(f"Error loading query: {e}")
 
 
+def inject_custom_css():
+    st.markdown("""
+<style>
+    /* Global Typography */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    
+    html, body, [class*="css"] {
+        font-family: 'Inter', sans-serif !important;
+    }
+
+    /* Headings */
+    h1 {
+        font-weight: 800 !important;
+        letter-spacing: -0.025em;
+    }
+    h2, h3 {
+        font-weight: 700 !important;
+        letter-spacing: -0.025em;
+    }
+    
+    /* Metrics Customization */
+    [data-testid="stMetric"] {
+        background-color: rgba(128, 128, 128, 0.05);
+        padding: 1.25rem 1.5rem;
+        border-radius: 0.75rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border: 1px solid rgba(128, 128, 128, 0.1);
+    }
+    
+    [data-testid="stMetric"]:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.15), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Metric Label */
+    [data-testid="stMetricLabel"] {
+        font-weight: 600 !important;
+        opacity: 0.8 !important;
+    }
+
+    /* Metric Value */
+    [data-testid="stMetricValue"] {
+        font-weight: 800 !important;
+    }
+
+    /* Dataframes/Tables */
+    [data-testid="stDataFrame"] {
+        border-radius: 0.75rem;
+        overflow: hidden;
+        box-shadow: 0 4px 10px -2px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(128, 128, 128, 0.2);
+    }
+
+    /* Forms */
+    [data-testid="stForm"] {
+        padding: 2rem;
+        border-radius: 1rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(128, 128, 128, 0.1);
+        background-color: rgba(128, 128, 128, 0.02);
+    }
+
+    /* Buttons */
+    .stButton > button {
+        border-radius: 0.5rem;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        border: 1px solid rgba(128, 128, 128, 0.2);
+    }
+    
+    .stButton > button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Tabs Styling */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 0.5rem;
+    }
+    .stTabs [data-baseweb="tab"] {
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem 0.5rem 0 0;
+        font-weight: 600;
+    }
+
+    /* Clean up the divider */
+    hr {
+        margin: 2.5em 0;
+        opacity: 0.3;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 def main():
     st.set_page_config(page_title="Campus Hub", layout="wide")
+    inject_custom_css()
     
     # Check if DB exists, if not sqlite3 connect will create an empty one
     conn = sqlite3.connect("campus_resources.db", check_same_thread=False)
