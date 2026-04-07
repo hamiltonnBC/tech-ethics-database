@@ -71,12 +71,14 @@ erDiagram
 You will be using `sqlite3` at the command line.
 
 **Mac/Linux:** Usually pre-installed. Open your terminal.
-**Windows:** If you don't have SQLite, you can download the command-line tools from the [SQLite Website](https://www.sqlite.org/download.html). Or, you can use online interactive tools like [DB Fiddle](https://www.db-fiddle.com/).
+**Windows:** If you don't have SQLite, you can download the command-line tools from the [SQLite Website](https://www.sqlite.org/download.html). Or, you can use the command from the presentation.
 
 To open a new SQLite database called `campus_resources.db`, type this in your terminal inside this repository folder:
 ```bash
 sqlite3 campus_resources.db
 ```
+You may need to delete the file if it already exists from the previous version.
+
 You will notice the prompt changes to `sqlite>`. This means you are now talking directly to the SQLite database engine!
 - Type `.help` for a list of SQLite commands.
 - Type `.quit` (or `.q`) to exit back to the normal terminal.
@@ -125,7 +127,7 @@ SELECT * FROM students;
 
 If you want to see all your data come to life, we've included an Interactive Dashboard written in Python that allows you to click through Student Profiles, Admin Data, and Resource Interactions. 
 
-Check out the [Dashboard Setup Guide (DASHBOARD_README.md)](DASHBOARD_README.md) to see how to instantly launch the UI on your laptop without the hassle of setting up complicated Python environments!
+Check out the [Dashboard Setup Guide (DASHBOARD_README.md)](DASHBOARD_README.md) to see how to instantly launch the UI on your laptop without the hassle of setting up a Python environment!
 
 ---
 

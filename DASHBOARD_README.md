@@ -3,7 +3,7 @@
 Welcome to the Tech Ethics Database Dashboard window! This UI is built entirely in Python using **Streamlit** and relies on **uv** as an ultra-fast package manager. Using `uv`, you don't even need to worry about manually installing Python or setting up Virtual Environments. It handles standardizing all requirements across both Windows and Mac seamlessly!
 
 ## Step 1: Install `uv`
-If you do not have `uv` installed, you will need it first. `uv` is a blazing fast package manager written in Rust.
+If you do not have `uv` installed, you will need it first. `uv` is a fast package manager written in Rust.
 
 **Windows (PowerShell):**
 Open PowerShell (as Administrator if possible, or standard user if Bypass is allowed) and run:
