@@ -1,7 +1,37 @@
 -- 2A: Insert Resources (Relies on 'providers')
--- Notice how provider_id points to the IDs generated above
--- provider_id 1 is 'Career Services', 2 is 'Math Club', 3 is 'First-Gen Center'
+-- Notice how provider_id points to the IDs generated in 1a_insert_providers.sql
+-- Examples: 1 is bell hooks center, 3 is Career Development Office, 6 is Non Traditional Student Center
 INSERT INTO resources (provider_id, title, category, description, expiration_date, req_non_trad_only, req_dorm_specific, req_min_class_year) VALUES
-(1, 'Summer Internship Grant', 'Financial', 'A $1000 grant for summer internships.', '2026-06-01', 0, NULL, 'Junior'),
-(3, 'First-Gen Textbook Fund', 'Academic', 'Assistance for purchasing core textbooks.', '2026-09-01', 0, NULL, 'Freshman'),
-(2, 'Math Tutoring Center', 'Academic', 'Drop-in tutoring for all math courses.', NULL, 0, NULL, NULL);
+(1, 'Feminist Theory Reading Group', 'Academic', 'Weekly discussion group on foundational texts.', NULL, 0, NULL, NULL),
+(1, 'Intersectionality Workshop', 'Events', 'A deep dive into intersectional advocacy.', '2026-10-15', 0, NULL, 'second year'),
+(1, 'bell hooks Scholarship', 'Financial', 'Annual scholarship for outstanding community service.', '2027-02-01', 0, NULL, 'third year'),
+(2, 'Drop-In Writing Tutoring', 'Academic', 'Peer review for all essays and papers.', NULL, 0, NULL, NULL),
+(2, 'Senior Thesis Workshop', 'Academic', 'Intensive weekend bootcamp for thesis writers.', '2026-11-20', 0, NULL, 'fourth year'),
+(2, 'Non-Trad Writing Support', 'Academic', 'Writing workshops specifically for adult learners.', NULL, 1, NULL, NULL),
+(3, 'Summer Internship Grant', 'Financial', 'A $1000 grant for summer internships.', '2026-06-01', 0, NULL, 'third year'),
+(3, 'Resume Review Session', 'Professional', '1-on-1 resume feedback.', NULL, 0, NULL, NULL),
+(3, 'Post-Graduation Pathways Seminar', 'Professional', 'Navigating the job market after college.', '2026-04-30', 0, NULL, 'fourth year'),
+(4, 'Individual Therapy Sessions', 'Wellness', 'Confidential therapy sessions for all students.', NULL, 0, NULL, NULL),
+(4, 'Stress Management Group', 'Wellness', 'Weekly group focusing on anxiety and stress.', NULL, 0, NULL, NULL),
+(4, 'First Year Adjustment Group', 'Wellness', 'For first years adjusting to campus life.', NULL, 0, NULL, 'first year'),
+(5, 'Quiet Testing Rooms', 'Support', 'Accommodated testing environments.', NULL, 0, NULL, NULL),
+(5, 'Assistive Tech Loan Program', 'Support', 'Borrow laptops, smart pens, etc.', '2026-12-15', 0, NULL, NULL),
+(6, 'Non-Trad Textbook Fund', 'Academic', 'Assistance for purchasing core textbooks.', '2026-09-01', 1, NULL, 'first year'),
+(6, 'Ecovillage Family Mixer', 'Events', 'A family-friendly cookout.', '2026-08-30', 1, 'Ecovillage', NULL),
+(6, 'Evening Childcare Grant', 'Financial', 'Help covering childcare during night classes.', '2027-01-15', 1, NULL, NULL),
+(7, 'Sunday Evening Dinner', 'Events', 'Free home-cooked meal every Sunday.', NULL, 0, NULL, NULL),
+(7, 'Retreat Scholarship', 'Financial', 'Full funding for the spring spiritual retreat.', '2027-03-01', 0, NULL, NULL),
+(8, 'Annual Campus Tournament', 'Extracurricular', 'Compete for the grandmaster title.', '2026-11-05', 0, NULL, NULL),
+(8, 'Beginner Strategy Lessons', 'Extracurricular', 'Open to all who want to learn.', NULL, 0, NULL, 'first year'),
+(9, 'Travel Fund for Nationals', 'Financial', 'Travel stipends for competitive debaters.', '2026-10-01', 0, NULL, 'second year'),
+(9, 'Public Speaking Bootcamp', 'Extracurricular', 'Learn how to project and articulate confidently.', NULL, 0, NULL, NULL),
+(10, 'Winter Cabin Trip', 'Events', 'Weekend getaway in the mountains.', '2027-01-10', 0, NULL, NULL),
+(10, 'Gear Rental Desk', 'Support', 'Rent tents, sleeping bags, and backpacks.', NULL, 0, NULL, NULL),
+(11, 'Study Abroad Scholarship', 'Financial', 'Needs-based funding for international semesters.', '2027-02-15', 0, NULL, 'second year'),
+(11, 'Passport Rush Service', 'Support', 'Help securing expedited passports.', '2026-05-01', 0, NULL, NULL),
+(12, 'On-Campus Job Fair', 'Professional', 'Meet with campus employers.', '2026-09-10', 0, NULL, NULL),
+(12, 'Commuter Gas Stipend', 'Financial', 'For off-campus students driving to campus jobs.', '2026-09-30', 0, 'Off Campus', NULL),
+(13, 'Free Flu Vaccine Clinic', 'Wellness', 'Annual flu shots for all students.', '2026-11-30', 0, NULL, NULL),
+(13, 'Nutrition Counseling', 'Wellness', 'Meet with a registered dietitian.', NULL, 0, NULL, NULL),
+(14, 'Emergency Hardship Grant', 'Financial', 'Immediate relief funding.', NULL, 0, NULL, NULL),
+(14, 'Upperclassman Housing Scholarship', 'Financial', 'Discounted housing for rising seniors.', '2027-04-01', 0, 'Seabury', 'third year');
